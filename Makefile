@@ -6,8 +6,12 @@ CPPFLAGS := -I . -I http-server/src -I html-builder/src
 CXXFLAGS := -Wall -Wextra -Wswitch-enum -pedantic -O2
 LDFLAGS :=
 
-server: main.cpp libs endpoints
-	$(CXX) $(CXXFLAGS) $(CPPFLAGS) -o $@ $< `find build -type f -name "*.o"` $(LDFLAGS)
+SOURCES += main.cpp
+SOURCES += build/endpoint-base.o build/endpoint-dispatcher.o
+SOURCES += build/http-server.a
+SOURCES += build/html-builder.o
+server: $(SOURCES)
+	$(CXX) -o $@ $(CXXFLAGS) $(CPPFLAGS) $^ $(LDFLAGS)
 
 build:
 	mkdir -p build
@@ -19,23 +23,13 @@ ENDPOINTS := $(shell find endpoints -type f)
 build/endpoint-dispatcher.o: endpoint-dispatcher.cpp $(ENDPOINTS) | build
 	$(CXX) -c $(CXXFLAGS) $(CPPFLAGS) -o $@ $<
 
-.PHONY: list-endpoints
-list-endpoints:
-	echo $(ENDPOINTS)
+build/http-server.a: build
+	cd http-server && make build/http-server.a
+	ln -sf $(PWD)/http-server/build/http-server.a $@
 
-.PHONY: endpoints
-endpoints: build/endpoint-base.o build/endpoint-dispatcher.o
-
-.PHONY: libs
-libs: http-libs html-builder-libs
-
-.PHONY: http-libs
-http-libs:
-	make -f http-server/Makefile all SRCDIR=http-server/src
-
-.PHONY: html-builder-libs
-html-builder-libs:
-	make -f html-builder/Makefile all SRCDIR=html-builder/src
+build/html-builder.o: build
+	cd html-builder && make build/html-builder.o
+	ln -sf $(PWD)/html-builder/build/html-builder.o $@
 
 .PHONY: test
 test: server

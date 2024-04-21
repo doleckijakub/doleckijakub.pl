@@ -13,9 +13,9 @@ static html::div fortune() {
 
 	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
 
-	std::string cowspeach = exec("fortune | cowsay -f "s + cowfile);
+	std::string cowspeech = exec("fortune | cowsay -f "s + cowfile);
 
-	div << (html::div() << escapeHtmlString(cowspeach));
+	div << (html::div() << escapeHtmlString(cowspeech));
 
 	return div;
 }

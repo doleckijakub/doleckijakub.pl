@@ -8,7 +8,7 @@ static html::div fortune() {
 
 	div.addAttribute("id", "fortune");
 
-	std::string cowfile = exec("cowsay -l | awk 'NR>1 {print $1}' | shuf -n 1");
+	std::string cowfile = exec("ls /usr/share/cows | shuf -n 1 | sed 's/.\\{4\\}$//'");
 	std::string cmd = "fortune | cowsay -f "s + cowfile;
 
 	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();

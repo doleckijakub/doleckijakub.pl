@@ -36,7 +36,36 @@ static html::div fortune() {
 
 	div.addAttribute("id", "fortune");
 
-	std::string cowfile = exec("ls /usr/share/cows | shuf -n 1 | sed 's/.\\{4\\}$//'");
+	std::string cowfiles[] = {
+		"bong",
+		"bud-frogs",
+		"bunny",
+		"cower",
+		"default",
+		"elephant-in-snake",
+		"flaming-sheep",
+		"head-in",
+		"kitty",
+		"koala",
+		"kosh",
+		"luke-koala",
+		"meow",
+		"moofasa",
+		"moose",
+		"mutilated",
+		"satanic",
+		"sheep",
+		"skeleton",
+		"small",
+		"supermilker",
+		"three-eyes",
+		"tux",
+		"vader",
+		"vader-koala",
+		"www",
+	};
+
+	std::string cowfile = cowfiles[rand() % std::size(cowfiles)];
 	std::string cmd = "fortune | cowsay -f "s + cowfile;
 
 	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();

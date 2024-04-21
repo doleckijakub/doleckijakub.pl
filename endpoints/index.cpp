@@ -3,6 +3,20 @@
 namespace endpoint {
 namespace index {
 
+static html::div fastfetch() {
+	auto div = html::div();
+
+	div.addAttribute("id", "fastfetch");
+
+	std::string cmd = "fastfetch";
+
+	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
+	
+	div << (html::div() << escapeHtmlString(exec("fastfetch -c /etc/fastfetch.jsonc | sed -b 's/\\x1b[^m]*m//g'")));
+
+	return div;
+}
+
 static html::div df() {
 	auto div = html::div();
 
@@ -12,7 +26,7 @@ static html::div df() {
 
 	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
 	
-	div << (html::div() << escapeHtmlString(exec("df")));
+	div << (html::div() << escapeHtmlString(exec(cmd)));
 
 	return div;
 }
@@ -27,9 +41,7 @@ static html::div fortune() {
 
 	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
 
-	std::string cowspeech = exec("fortune | cowsay -f "s + cowfile);
-
-	div << (html::div() << escapeHtmlString(cowspeech));
+	div << (html::div() << escapeHtmlString(exec(cmd)));
 
 	return div;
 }
@@ -50,6 +62,7 @@ endpointDispatchResult serve(http::request &req) {
 	{
 		auto body = html::body();
 		body << (html::main() /* <<  */);
+		body << fastfetch();
 		body << df();
 		body << fortune();
 		

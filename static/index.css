@@ -45,6 +45,14 @@ body {
 	}
 }
 
+#df {
+	display: block;
+	position: absolute;
+
+	right: 1rem;
+	top: 1rem;
+}
+
 #fortune {
 	display: block;
 	position: absolute;

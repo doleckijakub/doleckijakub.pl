@@ -3,6 +3,20 @@
 namespace endpoint {
 namespace index {
 
+static html::div df() {
+	auto div = html::div();
+
+	div.addAttribute("id", "df");
+
+	std::string cmd = "df";
+
+	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
+	
+	div << (html::div() << escapeHtmlString(exec("df")));
+
+	return div;
+}
+
 static html::div fortune() {
 	auto div = html::div();
 
@@ -26,16 +40,23 @@ endpointDispatchResult serve(http::request &req) {
 
 	auto html = html::html();
 
-	auto head = html::head();
-	head << html::link().addAttribute("rel", "stylesheet").addAttribute("href", "/index.css");
-	html << head;
+	{
+		auto head = html::head();
+		head << html::link().addAttribute("rel", "stylesheet").addAttribute("href", "/index.css");
+		
+		html << head;
+	}
 
-	auto body = html::body();
-	body << (html::main() /* <<  */);
-	body << fortune();
-	html << body;
+	{
+		auto body = html::body();
+		body << (html::main() /* <<  */);
+		body << df();
+		body << fortune();
+		
+		html << body;
+	}
 
-	return {true, sendHTML(req.response(), html)};
+	return { true, sendHTML(req.response(), html) };
 }
 
 } // namespace index

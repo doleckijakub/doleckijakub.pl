@@ -36,7 +36,7 @@ static html::div fortune() {
 
 	div.addAttribute("id", "fortune");
 
-	std::string cowfiles[] = {
+	static std::string cowfiles[] = {
 		"bong",
 		"bud-frogs",
 		"bunny",
@@ -75,6 +75,20 @@ static html::div fortune() {
 	return div;
 }
 
+static html::div pstree() {
+	auto div = html::div();
+
+	div.addAttribute("id", "pstree");
+
+	std::string cmd = "pstree";
+
+	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
+
+	div << (html::div() << escapeHtmlString(exec(cmd)));
+
+	return div;
+}
+
 endpointDispatchResult serve(http::request &req) {
 	if (req.url.path.size() != 0)
 		return {false, false};
@@ -91,8 +105,9 @@ endpointDispatchResult serve(http::request &req) {
 	{
 		auto body = html::body();
 		body << (html::main() /* <<  */);
-		body << fastfetch();
 		body << df();
+		body << pstree();
+		body << fastfetch();
 		body << fortune();
 		
 		html << body;

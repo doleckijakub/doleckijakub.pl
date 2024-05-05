@@ -3,6 +3,29 @@
 namespace endpoint {
 namespace index {
 
+static auto searchbars() {
+	auto main = html::main();
+	
+	main.addAttribute("style", "z-index: 1;");
+
+	const static auto searchbar = [](const char *action, const char *name, const char *placeholder) {
+		return html::form()
+			.addAttribute("action", action)
+			.addAttribute("method", "GET")
+			<< html::input()
+			.addAttribute("autofocus")
+			.addAttribute("class", "search")
+			.addAttribute("name", name)
+			.addAttribute("placeholder", placeholder);
+	};
+
+	main << searchbar("https://fusion.doleckijakub.pl/search", "q", "fusion");
+	main << searchbar("https://google.com/search", "q", "google");
+	main << searchbar("https://duckduckgo.com", "q", "ddg");
+
+	return main;
+}
+
 static html::div fastfetch() {
 	auto div = html::div();
 
@@ -104,7 +127,7 @@ endpointDispatchResult serve(http::request &req) {
 
 	{
 		auto body = html::body();
-		body << (html::main() /* <<  */);
+		body << searchbars();
 		body << df();
 		body << pstree();
 		body << fastfetch();

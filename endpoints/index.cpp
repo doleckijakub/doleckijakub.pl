@@ -239,7 +239,15 @@ static html::div fastfetch() {
 	})();
 	div << FASTFETCH_KEY("Packages") << packages << html::br();
 	
-	// TODO: CPU
+	static std::string cpu = ([]() {
+		std::string cpuinfo = read_file("/proc/cpuinfo");
+		const char *model_name_key   = strstr(cpuinfo.c_str(), "model name");
+		const char *model_name_start = strchr(model_name_key, ':') + 2;
+		const char *model_name_end   = strchr(model_name_start, '\n');
+		return std::string(model_name_start, model_name_end);
+	})();
+	div << FASTFETCH_KEY("CPU") << cpu << html::br();
+	
 	// TODO: CPU usage
 	// TODO: GPU
 	// TODO: Memory

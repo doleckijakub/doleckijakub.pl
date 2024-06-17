@@ -1,3 +1,7 @@
+* {
+	--searchbox-color: #423d51;
+}
+
 body {
 	background-color: #0f0f0f;
 
@@ -69,6 +73,10 @@ body {
 	bottom: 1rem;
 }
 
+.accented {
+	animation: rainbow 10s linear infinite;
+}
+
 #fortune {
 	display: block;
 	position: absolute;
@@ -91,4 +99,22 @@ main {
 	transform: translate(-50%, -50%);
 
 	width: max(250px, 20vw);
+}
+
+.search {
+	background: var(--searchbox-color);
+	color: white;
+
+	width: calc(100% - 40px);
+	height: 17px;
+
+	font-size: 17px;
+	font-family: 'Ubuntu Mono', monospace;
+	font-weight: bold;
+
+	border: none;
+	outline: none;
+
+	margin-top: 5px;
+	padding: 5px;
 }

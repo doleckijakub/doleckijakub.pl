@@ -1,5 +1,13 @@
 #include "endpoint-base.hpp"
 
+#include <unistd.h>
+#include <cstring>
+#include <cassert>
+#include <stdexcept>
+#include <fstream>
+#include <sys/types.h>
+#include <sys/stat.h>
+
 #include <iostream>
 #include <chrono>
 
@@ -34,7 +42,7 @@ struct profiler {
 		
 		if (duration_us < 1000) { std::cout << "~" << func << ": " << duration_us << "us" << std::endl; return; }
 		if (duration_ms < 1000) { std::cout << "~" << func << ": " << duration_ms << "ms" << std::endl; return; }
-		else                    { std::cout << "~" << func << ": " << duration_s  <<  "s" << std::endl; return; }
+		else					{ std::cout << "~" << func << ": " << duration_s  <<  "s" << std::endl; return; }
 	}
 
 };
@@ -69,8 +77,20 @@ static auto searchbars() {
 	return main;
 }
 
+static bool file_exists(const std::string& path) {
+	struct stat st;
+	return stat(path.c_str(), &st) == 0;
+};
+
+static std::string read_file(const std::string& file_path) {
+	std::ifstream file(file_path);
+	return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+};
+
 static html::div fastfetch() {
 	PROFILE;
+
+#if 0
 
 	auto div = html::div();
 
@@ -83,6 +103,87 @@ static html::div fastfetch() {
 	div << (html::div() << escapeHtmlString(exec("fastfetch -c /etc/fastfetch.jsonc | sed -b 's/\\x1b[^m]*m//g'")));
 
 	return div;
+
+#else
+
+	#define FASTFETCH_KEY(name) (html::span().addAttribute("class", "accented") << name) << ": "
+
+	auto div = html::div();
+	div.addAttribute("id", "fastfetch");
+
+	static std::string cmd = "fastfetch";
+	div << (html::span().addAttribute("class", "terminal") << cmd) << html::br();
+
+	static std::string title = ([]() {
+		char hostname[1024];
+		gethostname(hostname, 1024);
+		return std::string(getlogin()) + "@" + hostname;
+	})();
+	div << escapeHtmlString(title) << html::br();
+
+	static std::string separator = "----------------";
+	div << separator << html::br();
+
+	static std::string os = ([]() {
+			std::string name = ([]() {	
+				FILE *os_release = fopen("/usr/lib/os-release", "r");
+				assert(os_release);
+
+				char buffer[1024];
+				while (fgets(buffer, 1024, os_release)) {
+					if (strncmp(buffer, "PRETTY_NAME=", 12) == 0) {
+						char *start = strchr(buffer, '"') + 1;
+						char *end = strchr(start + 1, '"');
+						return std::string(start, end);
+					}
+				}
+
+				throw std::runtime_error("/usr/lib/os-release does not contain PRETTY_NAME");
+			})();
+
+			std::string arch = exec("uname -m");
+
+			return name + " " + arch;
+	})();
+	div << FASTFETCH_KEY("OS") << os << html::br();
+
+	static std::string host = ([]() {
+		std::string name = read_file("/sys/class/dmi/id/product_name");
+		name.erase(name.find_last_not_of(" \t\n\r\f\v") + 1);
+		std::string version = read_file("/sys/class/dmi/id/product_version");
+		version.erase(version.find_last_not_of(" \t\n\r\f\v") + 1);
+		return name + " (" + version + ")";
+	})();
+	div << FASTFETCH_KEY("Host") << host << html::br();
+
+	static std::string bios = ([]() {
+		std::string type = (file_exists("/sys/firmware/efi") || file_exists("/sys/firmware/acpi/tables/UEFI")) ? "UEFI" : "BIOS";
+		std::string version = read_file("/sys/class/dmi/id/bios_version");
+		std::string release = read_file("/sys/class/dmi/id/bios_release");
+
+		return "(" + type + ") " + version + " " + release;
+	})();
+	div << FASTFETCH_KEY("Bios") << bios << html::br();
+
+	// TODO: Board
+	// TODO: Chassis
+	// TODO: Kernel
+	// TODO: Uptime
+	// TODO: Packages
+	// TODO: CPU
+	// TODO: CPU usage
+	// TODO: GPU
+	// TODO: Memory
+	// TODO: Swap
+	// TODO: Disk
+	// TODO: Battery
+	// TODO: NetIO
+	// TODO: DiskIO
+	// TODO: Physical disk
+
+	return div;
+
+#endif
 }
 
 static html::div df() {

@@ -9,6 +9,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <dirent.h>
+#include <cinttypes>
 
 #include <iostream>
 #include <chrono>
@@ -248,7 +249,17 @@ static html::div fastfetch() {
 	})();
 	div << FASTFETCH_KEY("CPU") << cpu << html::br();
 	
-	// TODO: CPU usage
+	std::string cpu_usage = ([]() {
+		std::string stat = read_file("/proc/stat");
+		uint64_t usr, nice, sys, idl, iow, irq, sirq;
+		std::string format = "cpu ";
+		for (int i = 0; i < 7; i++) format += " %" PRIu64;
+		if (sscanf(stat.c_str(), format.c_str(), &usr, &nice, &sys, &idl, &iow, &irq, &sirq) != 7) throw std::runtime_error("failed to parse /proc/stat");
+		uint64_t used = usr + nice + sys;
+		return std::to_string(100 * used / (used + idl + iow + irq + sirq)) + "%";
+	})();
+	div << FASTFETCH_KEY("CPU Usage") << cpu_usage << html::br();
+	
 	// TODO: GPU
 	// TODO: Memory
 	// TODO: Swap

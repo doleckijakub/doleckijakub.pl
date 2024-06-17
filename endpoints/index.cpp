@@ -5,6 +5,7 @@
 #include <cassert>
 #include <stdexcept>
 #include <fstream>
+#include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 
@@ -167,8 +168,49 @@ static html::div fastfetch() {
 
 	// TODO: Board
 	// TODO: Chassis
-	// TODO: Kernel
-	// TODO: Uptime
+	
+	std::string kernel = exec("uname -r");
+	div << FASTFETCH_KEY("Kernel") << kernel << html::br();
+
+	std::string uptime = ([]() {
+		struct sysinfo info;
+		if (sysinfo(&info) == -1) throw std::runtime_error("sysinfo() failed");
+
+		int uptime = info.uptime;
+
+		int days = uptime / (24 * 3600);
+		uptime %= (24 * 3600);
+		int hours = uptime / 3600;
+		uptime %= 3600;
+		int minutes = uptime / 60;
+
+		std::string result;
+
+		if (days > 0) {
+			result += std::to_string(days) + " day";
+			if (days > 1) result += "s";
+			result += ", ";
+		}
+
+		if (hours > 0) {
+			result += std::to_string(hours) + " hour";
+			if (hours > 1) result += "s";
+			result += ", ";
+		}
+
+		if (minutes > 0) {
+			result += std::to_string(minutes) + " minute";
+			if (minutes > 1) result += "s";
+			result += ", ";
+		}
+
+		result.pop_back();
+		result.pop_back();
+
+		return result;
+	})();
+	div << FASTFETCH_KEY("Uptime") << uptime << html::br();
+	
 	// TODO: Packages
 	// TODO: CPU
 	// TODO: CPU usage

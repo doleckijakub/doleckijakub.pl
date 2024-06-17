@@ -8,6 +8,7 @@
 #include <sys/sysinfo.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <dirent.h>
 
 #include <iostream>
 #include <chrono>
@@ -87,6 +88,23 @@ static std::string read_file(const std::string& file_path) {
 	std::ifstream file(file_path);
 	return std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 };
+
+static int count_entries(const std::string& path) {
+    DIR *dp = opendir(path.c_str());
+	if (dp == NULL) throw std::runtime_error("opendir() failed");
+
+    int result = 0;
+
+	struct dirent *entry;
+    while ((entry = readdir(dp))) {
+		if (entry->d_name[0] == '.') continue;
+        result++;
+    }
+
+    closedir(dp);
+
+    return result;
+}
 
 static html::div fastfetch() {
 	PROFILE;
@@ -211,7 +229,16 @@ static html::div fastfetch() {
 	})();
 	div << FASTFETCH_KEY("Uptime") << uptime << html::br();
 	
-	// TODO: Packages
+	std::string packages = ([]() {
+	#define ARCH_LINUX
+	#ifdef ARCH_LINUX
+		return std::to_string(count_entries("/var/lib/pacman/local")) + " (pacman)";
+	#else
+	#	error Unimplemented
+	#endif
+	})();
+	div << FASTFETCH_KEY("Packages") << packages << html::br();
+	
 	// TODO: CPU
 	// TODO: CPU usage
 	// TODO: GPU

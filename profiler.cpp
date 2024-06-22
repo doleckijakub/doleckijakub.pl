@@ -5,6 +5,7 @@
 int profiler::indent = 0;
 
 static void print_indent(int indent) {
+    std::cout << "\e[32;1mprofiler\e[0m::";
     for (int i = 0; i < indent; i++) {
         std::cout << "  ";
     }

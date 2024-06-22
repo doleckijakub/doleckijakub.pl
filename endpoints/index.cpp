@@ -1,5 +1,7 @@
 #include "endpoint-base.hpp"
 
+#include "profiler.hpp"
+
 #include <unistd.h>
 #include <cstring>
 #include <cassert>
@@ -14,49 +16,11 @@
 #include <iostream>
 #include <chrono>
 
-static int p = 0;
-
-struct profiler {
-
-	static void pp() {
-		for (int i = 0; i < p; i++) {
-			std::cout << "  ";
-		}
-	}
-	
-	const char *func;
-	std::chrono::high_resolution_clock::time_point start;
-
-	profiler(const char *func) : func(func) {
-		start = std::chrono::high_resolution_clock::now();
-
-		pp();
-		std::cout << func << std::endl;
-		p++;
-	}
-
-	~profiler() {
-		auto end = std::chrono::high_resolution_clock::now();
-		p--;
-		pp();
-		auto duration_us = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
-		auto duration_ms = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-		auto duration_s = std::chrono::duration_cast<std::chrono::seconds>(end - start).count();
-		
-		if (duration_us < 1000) { std::cout << "~" << func << ": " << duration_us << "us" << std::endl; return; }
-		if (duration_ms < 1000) { std::cout << "~" << func << ": " << duration_ms << "ms" << std::endl; return; }
-		else					{ std::cout << "~" << func << ": " << duration_s  <<  "s" << std::endl; return; }
-	}
-
-};
-
-#define PROFILE profiler e(__func__)
-
 namespace endpoint {
 namespace index {
 
 static auto searchbars() {
-	PROFILE;
+	PROFILE_FUNC;
 
 	auto main = html::main();
 	
@@ -108,7 +72,7 @@ static int count_entries(const std::string& path) {
 }
 
 static html::div fastfetch() {
-	PROFILE;
+	PROFILE_FUNC;
 
 #if 0
 
@@ -275,7 +239,7 @@ static html::div fastfetch() {
 }
 
 static html::div df() {
-	PROFILE;
+	PROFILE_FUNC;
 
 	auto div = html::div();
 
@@ -291,7 +255,7 @@ static html::div df() {
 }
 
 static html::div fortune() {
-	PROFILE;
+	PROFILE_FUNC;
 
 	auto div = html::div();
 
@@ -337,7 +301,7 @@ static html::div fortune() {
 }
 
 static html::div pstree() {
-	PROFILE;
+	PROFILE_FUNC;
 
 	auto div = html::div();
 
@@ -353,7 +317,7 @@ static html::div pstree() {
 }
 
 endpointDispatchResult serve(http::request &req) {
-	PROFILE;
+	PROFILE_FUNC;
 
 	if (req.url.path.size() != 0)
 		return {false, false};

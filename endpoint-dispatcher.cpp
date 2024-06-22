@@ -7,12 +7,14 @@
 // endpoints
 #include "endpoints/index.cpp"
 #include "endpoints/services.cpp"
+#include "endpoints/tor_stats.cpp"
 
 static std::unordered_map<std::string, std::function<endpointDispatchResult(http::request &)>> endpoints;
 
 static void bakeEndpoints() {
 	endpoints.insert_or_assign("/", endpoint::index::serve);
 	endpoints.insert_or_assign("/services", endpoint::services::serve);
+	endpoints.insert_or_assign("/tor_stats", endpoint::tor_stats::serve);
 }
 
 endpointDispatchResult tryDispatchEndpoint(http::request &req) {

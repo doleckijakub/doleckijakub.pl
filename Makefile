@@ -7,6 +7,7 @@ CXXFLAGS := -Wall -Wextra -Wswitch-enum -pedantic -O2
 LDFLAGS :=
 
 SOURCES += main.cpp
+SOURCES += build/profiler.o
 SOURCES += build/endpoint-base.o build/endpoint-dispatcher.o
 SOURCES += build/http-server.a
 SOURCES += build/html-builder.o

@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <netinet/in.h>
 #include <fstream>
+#include <filesystem>
 
 const int port_number = 8080;
 const int buffer_size = 4096;
@@ -16,17 +17,30 @@ void handle_client(int client_socket) {
     std::string request(buffer);
     std::string response;
 
-    if (request.find("GET /style.css") != std::string::npos) {
-        std::ifstream css_file("static/style.css");
-        std::string css_content((std::istreambuf_iterator<char>(css_file)),
-                                 std::istreambuf_iterator<char>());
+    size_t path_start = request.find("GET ") + 4;
+    size_t path_end = request.find(" HTTP/");
+    std::string path = request.substr(path_start, path_end - path_start);
 
-        response = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n" + css_content;
-    } else {
+    if (path == "/") {
         response =
             "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
             "<html><head><link rel=\"stylesheet\" href=\"/style.css\"></head>"
             "<body><h1>Welcome to doleckijakub.pl</h1></body></html>";
+    } else {
+        std::string file_path = "static" + path;
+        if (std::filesystem::exists(file_path) && !std::filesystem::is_directory(file_path)) {
+            std::ifstream file(file_path);
+            std::string content((std::istreambuf_iterator<char>(file)),
+                                 std::istreambuf_iterator<char>());
+
+            std::string content_type = "text/plain";
+            if (path.ends_with(".css")) content_type = "text/css";
+            else if (path.ends_with(".html")) content_type = "text/html";
+
+            response = "HTTP/1.1 200 OK\r\nContent-Type: " + content_type + "\r\n\r\n" + content;
+        } else {
+            response = "HTTP/1.1 404 Not Found\r\nContent-Type: text/plain\r\n\r\n404 Not Found";
+        }
     }
 
     write(client_socket, response.c_str(), response.length());

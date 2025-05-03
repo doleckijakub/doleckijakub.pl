@@ -3,6 +3,7 @@
 #include <cstring>
 #include <unistd.h>
 #include <netinet/in.h>
+#include <fstream>
 
 const int port_number = 8080;
 const int buffer_size = 4096;
@@ -12,10 +13,21 @@ void handle_client(int client_socket) {
     memset(buffer, 0, buffer_size);
     read(client_socket, buffer, buffer_size - 1);
 
-    std::string response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/html\r\n\r\n"
-        "<html><body><h1>Welcome to doleckijakub.pl</h1></body></html>";
+    std::string request(buffer);
+    std::string response;
+
+    if (request.find("GET /style.css") != std::string::npos) {
+        std::ifstream css_file("static/style.css");
+        std::string css_content((std::istreambuf_iterator<char>(css_file)),
+                                 std::istreambuf_iterator<char>());
+
+        response = "HTTP/1.1 200 OK\r\nContent-Type: text/css\r\n\r\n" + css_content;
+    } else {
+        response =
+            "HTTP/1.1 200 OK\r\nContent-Type: text/html\r\n\r\n"
+            "<html><head><link rel=\"stylesheet\" href=\"/style.css\"></head>"
+            "<body><h1>Welcome to doleckijakub.pl</h1></body></html>";
+    }
 
     write(client_socket, response.c_str(), response.length());
     close(client_socket);

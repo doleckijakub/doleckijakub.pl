@@ -9,6 +9,15 @@ enum class HttpMethod {
     UNKNOWN
 };
 
+inline std::string to_string(HttpMethod method) {
+    switch (method) {
+        case HttpMethod::GET:     return "GET";
+        case HttpMethod::POST:    return "POST";
+        default:                  return "UNKNOWN";
+    }
+}
+
+
 struct Request {
     HttpMethod method;
     std::string path;

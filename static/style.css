@@ -1,6 +1,110 @@
 body {
-    background-color: #f0f0f0;
-    font-family: Arial, sans-serif;
-    text-align: center;
+  margin: 0;
+  font-family: 'Fira Code', monospace;
+  background: #000;
+  color: #fff;
+  overflow-x: hidden;
 }
 
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  background: linear-gradient(to right, transparent, black, transparent);
+  z-index: -5;
+}
+
+main {
+  max-width: 800px;
+  margin: 5rem auto;
+  padding: 2rem;
+  z-index: 1;
+  position: relative;
+  text-align: center;
+}
+
+h1 {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  color: #d11a1c;
+}
+
+h2 {
+  margin-top: 2.5rem;
+  font-size: 2rem;
+  color: #ff4242;
+}
+
+.align-center {
+  margin-left: auto;
+  margin-right: auto;
+  border: none;
+}
+
+.align-center td:first-child {
+  text-align: right;
+  padding-right: 1em;
+}
+
+.align-center td:last-child {
+  text-align: left;
+}
+
+a {
+  color: #48aad9;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.nav a {
+  margin-right: 1.2rem;
+  display: inline-block;
+}
+
+.projects ul {
+  padding-left: 1rem;
+}
+
+.graph {
+  margin-top: 1.5rem;
+}
+
+.widget {
+  position: fixed;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ccc;
+  padding: 0.6rem 0.8rem;
+  white-space: pre-wrap;
+  line-height: 1.3;
+  z-index: -10;
+  pointer-events: none;
+}
+
+.top-left {
+  top: 1rem;
+  left: 1rem;
+}
+
+.top-right {
+  top: 1rem;
+  right: 1rem;
+}
+
+.bottom-left {
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.bottom-right {
+  bottom: 1rem;
+  right: 1rem;
+}

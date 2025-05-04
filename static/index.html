@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>doleckijakub.pl</title>
+  <link href="style.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <pre class="widget top-left">
+    $ df -h
+    Filesystem      Size  Used Avail Use% Mounted on
+    dev              10M     0   10M   0% /dev
+    run              12G  2.3M   12G   1% /run
+    efivarfs        120K  101K   15K  88% /sys/firmware/efi/efivars
+    /dev/sdc2       937G  168G  722G  19% /
+    shm              12G     0   12G   0% /dev/shm
+    /dev/sdc1      1022M  148K 1022M   1% /boot/efi
+    /dev/nvme0n1p1  954G  1.7M  954G   1% /nvme0n1p1
+    tmpfs           2.4G   16K  2.4G   1% /run/user/1000</pre>
+  <pre class="widget bottom-left">
+  $ fortune | cowsay
+  "Ship it."
+    \ ^__^
+      (oo)\_______
+      (__)\       )\/\
+          ||----w |</pre>
+  <pre class="widget top-right">
+  $ neofetch
+                      '                      jacob@server-btw 
+                    'o'                     ---------------- 
+                    'ooo'                    OS: Artix Linux x86_64 
+                  'ooxoo'                   Host: HP Z440 Workstation 
+                  'ooxxxoo'                  Kernel: 6.13.7-artix1-1 
+                'oookkxxoo'                 Uptime: 19 hours, 7 mins 
+                'oiioxkkxxoo'                Packages: 473 (pacman) 
+              ':;:iiiioxxxoo'               Shell: bash 5.2.37 
+                  `'.;::ioxxoo'              WM: bspwm 
+            '-.      `':;jiooo'             Theme: Adwaita [GTK3] 
+            'oooio-..     `'i:io'            Icons: Adwaita [GTK3] 
+          'ooooxxxxoio:,.   `'-;'           Terminal: /dev/pts/2 
+          'ooooxxxxxkkxoooIi:-.  `'          CPU: Intel Xeon E5-2680 v4 (28) @ 3.300GHz 
+        'ooooxxxxxkkkkxoiiiiiji'            GPU: NVIDIA GeForce GTX 1060 6GB 
+        'ooooxxxxxkxxoiiii:'`     .i'        Memory: 1291MiB / 23941MiB 
+      'ooooxxxxxoi:::'`       .;ioxo'
+      'ooooxooi::'`         .:iiixkxxo'                              
+    'ooooi:'`                `'';ioxxo'                             
+    'i:'`                          '':io'
+  '`                                   `'</pre>
+    <main>
+      <h1>&lt;/&gt; doleckijakub &lt;/&gt;</h1>
+    
+      <section class="services">
+        <h2>Services</h2>
+        <table class="align-center">
+          <tbody>
+            <tr>
+              <td><a href="https://fusion.doleckijakub.pl">fusion.doleckijakub.pl</a></td>
+              <td>My own web browser, based on the idea of <a href="https://github.com/searx/searx">SearX</a> but faster</td>
+            </tr>
+            <tr>
+              <td><a href="https://mirrors.doleckijakub.pl">mirrors.doleckijakub.pl</a></td>
+              <td>The Arch and Artix mirrors I host, mostly for myself, but feel free to use them - They are pretty slow as I proxy through Cloudflare (for now)</td>
+            </tr>
+            <tr>
+              <td><a href="https://cppreference.doleckijakub.pl">cppreference.doleckijakub.pl</a></td>
+              <td>Offline C++ documentation</td>
+            </tr>
+            <tr>
+              <td><a href="https://rust-docs.doleckijakub.pl">rust-docs.doleckijakub.pl</a></td>
+              <td>Offline Rust documentation</td>
+            </tr>
+            <tr>
+              <td><a href="https://cdn.doleckijakub.pl">cdn.doleckijakub.pl</a></td>
+              <td>My preliminary online file uploader, written in C# using the .NET framework</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    
+      <section class="projects">
+        <h2>Projects</h2>
+        <table class="align-center">
+          <tbody>
+            <tr>
+              <td>
+                <a href="https://github.com/doleckijakub/tadeusz">tadeusz</a>
+              </td>
+              <td>
+                A voice assistant / robot AI controlling my room and home <i>(WIP)</i>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="https://github.com/doleckijakub/webnes">webnes</a>
+              </td>
+              <td>
+                A browser-based NES emulator <i>(WIP)</i>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <a href="https://github.com/doleckijakub/brainfucked">brainfucked</a>
+              </td>
+              <td>
+                My experiment trying to make brainfuck a usable language <i>(WIP)</i>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    
+      <section class="graphs">
+        <h2>Live Server Info</h2>
+        <canvas id="usageChart" width="800" height="300"></canvas>
+      </section>
+
+      <footer>
+        <p>© 2025 Jakub Dolecki</p>
+      </footer>
+    </main>
+
+  <script src="index.js"></script>
+</body>
+</html>

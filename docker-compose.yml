@@ -1,0 +1,17 @@
+services:
+  web:
+    build: ./web
+    develop:
+      watch:
+        - action: rebuild
+          path: ./web
+          target: /app
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "4080:80"
+    depends_on:
+      - web
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf

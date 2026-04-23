@@ -1,6 +1,15 @@
 services:
   web:
     build: ./web
+    container_name: doleckijakub.pl_web
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:3000').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 1s
+      timeout: 15s
+      retries: 20
+      start_period: 2s
+    networks:
+      - doleckijakub.pl
     develop:
       watch:
         - action: rebuild
@@ -9,9 +18,16 @@ services:
 
   nginx:
     image: nginx:alpine
+    container_name: doleckijakub.pl_nginx
     ports:
       - "4080:80"
     depends_on:
       - web
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+    networks:
+      - doleckijakub.pl
+
+networks:
+  doleckijakub.pl:
+    external: true

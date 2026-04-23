@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import Section from "../ui/Section";
 import CalendarHeatmap from "react-calendar-heatmap";
 import "react-calendar-heatmap/dist/styles.css";
@@ -14,7 +14,7 @@ import {
     ResponsiveContainer,
 } from "recharts";
 
-function Stat({ label, value }: any) {
+function Stat({ label, value }: { label: string; value: any }) {
     return (
         <div className="border border-white/10 p-3 rounded">
             <div className="text-white font-mono">{value}</div>
@@ -27,27 +27,8 @@ function formatYears(date: string) {
     const years =
         (Date.now() - new Date(date).getTime()) /
         (1000 * 60 * 60 * 24 * 365);
+
     return `${Math.floor(years)} years ago`;
-}
-
-function buildDailyData(weeks: any[]) {
-    return weeks.flatMap((w: any) =>
-        w.contributionDays.map((d: any) => ({
-            date: d.date,
-            count: d.contributionCount,
-        }))
-    );
-}
-
-function calculateStreak(days: { date: string; count: number }[]) {
-    let streak = 0;
-
-    for (let i = days.length - 1; i >= 0; i--) {
-        if (days[i].count > 0) streak++;
-        else break;
-    }
-
-    return streak;
 }
 
 export default function GithubStats() {
@@ -59,18 +40,18 @@ export default function GithubStats() {
             .then(setData);
     }, []);
 
+    const heatmapData = useMemo(
+        () =>
+            data?.daily.map((d: any) => ({
+                date: d.date,
+                count: d.count,
+            })),
+        [data?.daily]
+    );
+
     if (!data) return <Section title="github">loading...</Section>;
 
-    const user = data.data.user;
-    const weeks = user.contributionsCollection.contributionCalendar.weeks;
-
-    const daily = buildDailyData(weeks);
-    const streak = calculateStreak(daily);
-
-    const heatmapData = daily.map((d) => ({
-        date: d.date,
-        count: d.count,
-    }));
+    const daily = data.daily;
 
     return (
         <Section title="github">
@@ -86,35 +67,41 @@ export default function GithubStats() {
                         <LineChart data={daily}>
                             <XAxis dataKey="date" hide />
                             <YAxis hide />
-                            <Tooltip />
+                            <Tooltip
+                                contentStyle={{
+                                    backgroundColor: "#0b0f1a",
+                                    border: "1px solid rgba(255,255,255,0.1)",
+                                }}
+                            />
                             <Line
                                 type="monotone"
                                 dataKey="count"
                                 stroke="#22d3ee"
                                 dot={false}
+                                strokeWidth={2}
                             />
                         </LineChart>
                     </ResponsiveContainer>
                 </div>
 
-                {/* stats row */}
+                {/* STATS */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-sm">
                     <Stat
                         label="total contributions"
-                        value={
-                            user.contributionsCollection.contributionCalendar
-                                .totalContributions
-                        }
+                        value={data.total_contributions}
                     />
                     <Stat
                         label="public repos"
-                        value={user.repositories.totalCount}
+                        value={data.public_repos}
                     />
                     <Stat
                         label="joined"
-                        value={formatYears(user.createdAt)}
+                        value={formatYears(data.joined_at)}
                     />
-                    <Stat label="current streak" value={`${streak} days`} />
+                    <Stat
+                        label="current streak"
+                        value={`${data.current_streak} days`}
+                    />
                 </div>
 
                 {/* HEATMAP */}

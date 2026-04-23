@@ -7,14 +7,22 @@ use tokio::sync::RwLock;
 
 #[derive(Serialize, Clone)]
 pub struct GitHubStats {
+    pub joined_at: String,
     pub total_contributions: i32,
     pub public_repos: i32,
-    pub joined_at: String,
-
+    pub active_days_ratio: i32,
     pub current_streak: i32,
     pub longest_streak: i32,
 
     pub daily: Vec<DailyContribution>,
+    pub languages: Vec<LanguageStat>,
+}
+
+#[derive(Serialize, Clone)]
+pub struct LanguageStat {
+    pub name: String,
+    pub bytes: i64,
+    pub percent: f64,
 }
 
 #[derive(Serialize, Clone)]
@@ -29,16 +37,27 @@ const TTL: Duration = Duration::from_mins(5);
 
 async fn fetch_github_raw(token: &str) -> serde_json::Value {
     let years_query = r#"
-    {
-      user(login: "doleckijakub") {
-        createdAt
-        repositories(privacy: PUBLIC) { totalCount }
-        contributionsCollection {
-          contributionYears
+      {
+        user(login: "doleckijakub") {
+          createdAt
+          repositories(privacy: PUBLIC, first: 100) {
+            totalCount
+            nodes {
+              name
+              languages(first: 10) {
+                edges {
+                  size
+                  node { name }
+                }
+              }
+            }
+          }
+          contributionsCollection {
+            contributionYears
+          }
         }
       }
-    }
-    "#;
+      "#;
 
     let years_resp: serde_json::Value = reqwest::Client::new()
         .post("https://api.github.com/graphql")
@@ -87,14 +106,25 @@ async fn fetch_github_raw(token: &str) -> serde_json::Value {
 
     let full_query = format!(
         r#"
-    {{
-      user(login: "doleckijakub") {{
-        createdAt
-        repositories(privacy: PUBLIC) {{ totalCount }}
-        {year_fragments}
-      }}
-    }}
-    "#
+        {{
+          user(login: "doleckijakub") {{
+            createdAt
+            repositories(privacy: PUBLIC, first: 100) {{
+              totalCount
+              nodes {{
+                name
+                languages(first: 10) {{
+                  edges {{
+                    size
+                    node {{ name }}
+                  }}
+                }}
+              }}
+            }}
+            {year_fragments}
+          }}
+        }}
+        "#
     );
 
     reqwest::Client::new()
@@ -173,19 +203,64 @@ fn build_stats(raw: serde_json::Value) -> GitHubStats {
         let d = chrono::Utc::now() - chrono::Duration::days(365);
         d.format("%Y-%m-%d").to_string()
     };
+
     let daily = all_days
+        .clone()
         .into_iter()
         .filter(|(date, _)| date.as_str() >= cutoff.as_str())
         .map(|(date, count)| DailyContribution { date, count })
         .collect();
 
+    let active_days_ratio = {
+        let active = all_days
+            .iter()
+            .filter(|(date, count)| date.as_str() >= cutoff.as_str() && *count > 0)
+            .count();
+        (100 * active / 365) as i32
+    };
+
+    let mut lang_bytes: std::collections::HashMap<String, i64> = std::collections::HashMap::new();
+
+    if let Some(nodes) = user["repositories"]["nodes"].as_array() {
+        for repo in nodes {
+            if let Some(edges) = repo["languages"]["edges"].as_array() {
+                for edge in edges {
+                    let name = edge["node"]["name"]
+                        .as_str()
+                        .unwrap_or("Unknown")
+                        .to_string();
+                    let size = edge["size"].as_i64().unwrap_or(0);
+                    *lang_bytes.entry(name).or_insert(0) += size;
+                }
+            }
+        }
+    }
+
+    let total_bytes: i64 = lang_bytes.values().sum();
+    let mut languages: Vec<LanguageStat> = lang_bytes
+        .into_iter()
+        .map(|(name, bytes)| LanguageStat {
+            name,
+            bytes,
+            percent: if total_bytes > 0 {
+                100.0 * bytes as f64 / total_bytes as f64
+            } else {
+                0.0
+            },
+        })
+        .collect();
+    languages.sort_by(|a, b| b.bytes.cmp(&a.bytes));
+
     GitHubStats {
+        joined_at: user["createdAt"].as_str().unwrap().to_string(),
         total_contributions: total,
         public_repos: user["repositories"]["totalCount"].as_i64().unwrap() as i32,
-        joined_at: user["createdAt"].as_str().unwrap().to_string(),
+        active_days_ratio,
         current_streak,
         longest_streak,
+
         daily,
+        languages,
     }
 }
 

@@ -7,22 +7,47 @@ services:
       interval: 1s
       timeout: 15s
       retries: 20
-      start_period: 2s
+    restart: unless-stopped
     networks:
-      - doleckijakub.pl
+      doleckijakub.pl:
+        aliases:
+          - doleckijakub.pl_web
+        
     develop:
       watch:
         - action: rebuild
           path: ./web
           target: /app
 
+  api:
+    build: ./api
+    container_name: doleckijakub.pl_api
+    networks:
+      doleckijakub.pl:
+        aliases:
+          - doleckijakub.pl_api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3001"]
+      interval: 1s
+      timeout: 15s
+      retries: 20
+    restart: unless-stopped
+    env_file: .env
+    develop:
+      watch:
+        - action: rebuild
+          path: ./api
+          target: /app
+
   nginx:
     image: nginx:alpine
     container_name: doleckijakub.pl_nginx
+    restart: unless-stopped
     ports:
       - "4080:80"
     depends_on:
       - web
+      - api
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf
     networks:

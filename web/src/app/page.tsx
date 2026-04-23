@@ -1,6 +1,7 @@
 import Hero from "@/components/blocks/Hero";
 import Projects from "@/components/blocks/Projects";
 import TechStack from "@/components/blocks/TechStack";
+import GithubStats from "@/components/blocks/GithubStats";
 
 export default function Home() {
   return (
@@ -9,7 +10,7 @@ export default function Home() {
       <Projects />
       <TechStack />
       {/* TODO: Education */}
-      {/* TODO: GithubStats */}
+      <GithubStats />
       {/* TODO: BlogPreview */}
       {/* TODO: ServerStats */}
     </main>
